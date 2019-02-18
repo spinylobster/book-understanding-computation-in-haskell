@@ -37,7 +37,6 @@ data Expression =
   | Boolean Bool
   | And Expression Expression
   | Or Expression Expression
-  | Not Expression
   | LessThan Expression Expression
   deriving (Eq)
 
@@ -49,7 +48,6 @@ instance Show Expression where
   show (Boolean b) = show b
   show (And left right) = show left ++ " && " ++ show right
   show (Or left right) = show left ++ " || " ++ show right
-  show (Not b) = "!" ++ show b
   show (LessThan left right) = show left ++ " < " ++ show right
 
 instance SIMPLE Expression where
