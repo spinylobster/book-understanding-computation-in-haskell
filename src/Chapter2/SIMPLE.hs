@@ -45,7 +45,7 @@ instance Show Expression where
   show (Number a) = show a
   show (Add left right) = show left ++ " + " ++ show right
   show (Multiply left right) = show left ++ " * " ++ show right
-  show (Boolean b) = show b
+  show (Boolean b) = toLower <$> show b
   show (And left right) = show left ++ " && " ++ show right
   show (Or left right) = show left ++ " || " ++ show right
   show (LessThan left right) = show left ++ " < " ++ show right
