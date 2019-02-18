@@ -31,7 +31,7 @@ run (program, env) = do
 
 data Expression =
   Variable String
-  | Number Int
+  | Number Integer
   | Add Expression Expression
   | Multiply Expression Expression
   | Boolean Bool
