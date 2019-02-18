@@ -9,8 +9,6 @@ spec = do
   let reduceN n = foldl (.) reduce $ replicate (n-1) reduce
 
   describe "SIMPLE.Expression" $ do
-    let env = Map.empty :: Env
-
     it "should be an instance of Show" $ do
       let exp = Add
             (Multiply (Number 1) (Number 2))
@@ -20,6 +18,7 @@ spec = do
       inspect exp `shouldBe` "<<5>>"
 
     describe "reduce" $ do
+      let env = Map.empty :: Env
       context ("with env: " <> show env) $ do
         let exp = Add
               (Multiply (Number 1) (Number 2))
@@ -149,17 +148,16 @@ spec = do
           actual `shouldBe` expected
           
   describe "SIMPLE.Statement" $ do
-    let emptyEnv = Map.empty
-    let stat1 = Assign "x" $ Add (Variable "x") (Number 1)
-
     it "should be an instance of Show" $ do
-      inspect stat1 `shouldBe` "<<x = x + 1>>"
+      let stat = Assign "x" $ Add (Variable "x") (Number 1)
+      inspect stat `shouldBe` "<<x = x + 1>>"
 
     describe "reduce" $ do
       let env = Map.singleton "x" $ Number 2
       context ("with env: " <> show env) $ do
-        describe (inspect stat1) $ do
-          let machine = (stat1, env)
+        let stat = Assign "x" $ Add (Variable "x") (Number 1)
+        describe (inspect stat) $ do
+          let machine = (stat, env)
 
           let expected = (Assign "x" $ Add (Number 2) (Number 1), env)
           it ("reduce once should be: " <> show expected) $ do
@@ -320,3 +318,11 @@ spec = do
         it ("should be: " <> expected) $ do
           let actual = toRuby stat
           actual `shouldBe` expected
+
+  describe "SIMPLE.parseSimple" $ do
+    let source = "x = 1; while (x < 5) { x = x * 3 }"
+    describe source $ do
+      it "x should be 9" $ do
+        let Right stat = parseSimple source
+        let resultEnv = snd . evaluate $ (stat, Map.empty)
+        resultEnv `shouldBe` Map.singleton "x" (Number 9)
