@@ -45,3 +45,21 @@ spec =
         it "" $ nfa `accepts` "aaaaa" `shouldBe` False
         it "" $ nfa `accepts` "aaaaaa" `shouldBe` True
 
+    describe "toDfa" $ do
+      let rulebook = [nfaRule (1, Just 'a') 1, nfaRule (1, Just 'a') 2, nfaRule (1, Nothing) 2
+                  , nfaRule (2, Just 'b') 3
+                  , nfaRule (3, Just 'b') 1, nfaRule (3, Nothing) 2]
+      let nfa = makeNfa [1] [3] rulebook
+      let actual = toDfa nfa
+      let dfaRulebook = [ dfaRule (2, 'a') 2, dfaRule (1, 'a') 1
+                        , dfaRule (3, 'a') 1, dfaRule (4, 'a') 2
+                        , dfaRule (2, 'b') 2, dfaRule (1, 'b') 4
+                        , dfaRule (3, 'b') 3, dfaRule (4, 'b') 3]
+      let expected = makeDfa 1 [3, 4] dfaRulebook
+      it ("should be " <> show expected) $ actual `shouldBe` expected
+
+      it "" $ do
+        let dfa = actual
+        dfa `accepts` "aaa" `shouldBe` False
+        dfa `accepts` "aab" `shouldBe` True
+        dfa `accepts` "bbbabb" `shouldBe` True

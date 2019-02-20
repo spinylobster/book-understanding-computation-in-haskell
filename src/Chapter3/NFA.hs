@@ -2,12 +2,21 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TupleSections #-}
 
-module Chapter3.NFA where
+module Chapter3.NFA
+  ( NFA(..)
+  , NFARulebook
+  , makeNfa
+  , nfaRule
+  , toDfa
+  ) where
 
 import Chapter3.DFA
 import Chapter3.Automaton
 
+import Data.Maybe (catMaybes)
+import Data.List (nub)
 import qualified Data.Set as Set
+import qualified Data.Map as Map
 import Data.String.Interpolate
 
 type NFAConfig = Set.Set State
@@ -41,6 +50,34 @@ instance Automaton NFA where
     where (NFA states' ass _) = followFreeMoves nfa
   nfa `readCharacter` char = nfa { nfaStates = states' }
     where states' = nextStates (followFreeMoves nfa) (Just char)
+
+toDfa :: NFA -> DFA
+toDfa nfa = makeDfa 1 ass rules
+  where
+    ass = (allStatesMap Map.!) <$> ass'
+      where ass' = filter (accepting . setStates nfa) $ Map.keys allStatesMap
+            setStates nfa states = nfa { nfaStates = states }
+    rules = toDfaRule <$> allRules
+      where toDfaRule (from, char, to) = dfaRule (from', char) to'
+              where [from', to'] = (allStatesMap Map.!) <$> [from, to]
+    initialStates = nfaStates $ followFreeMoves nfa
+    (allStates, allRules) = discover $ Set.singleton initialStates
+      where
+        discover :: Set.Set NFAConfig -> (Set.Set NFAConfig, [(NFAConfig, Char, NFAConfig)])
+        discover states = if noMoreFound then (states, rules) else next
+          where noMoreFound = moreStates `Set.isSubsetOf` states
+                rules = (discover' <$> alphabet) <*> Set.toList states
+                moreStates = Set.fromList . (\(_, _, x) -> x) $ unzip3 rules
+                next = discover (states <> moreStates)
+        discover' char states = (states, char, nfaStates $ nfa')
+          where nfa' = nfa { nfaStates = states } `readCharacter` char
+    alphabet = nub . catMaybes $ getChar <$> nfaRules nfa
+      where getChar (AutomatonRule (_, c) _) = c
+    allStatesMap :: Map.Map NFAConfig DFAConfig
+    allStatesMap = foldl (insert) initialMap allStates
+      where initialMap = Map.singleton initialStates 1
+            insert map states = Map.insertWith seq states state map
+              where state = maximum map + 1
 
 type NFARule = AutomatonRule NFACond
 nfaRule :: NFACond -> NextState -> NFARule
