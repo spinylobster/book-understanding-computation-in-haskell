@@ -79,7 +79,7 @@ toDfa nfa = makeDfa 1 ass rules
             insert map states = Map.insertWith seq states state map
               where state = maximum map + 1
 
-type NFARule = AutomatonRule NFACond
+type NFARule = AutomatonRule NFACond NextState
 nfaRule :: NFACond -> NextState -> NFARule
 nfaRule = AutomatonRule
 

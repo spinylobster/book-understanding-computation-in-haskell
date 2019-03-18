@@ -24,6 +24,7 @@ dependencies:
 - containers
 - parsec
 - interpolate
+- regex-pcre-builtin
 
 library:
   source-dirs: src

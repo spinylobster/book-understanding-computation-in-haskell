@@ -23,7 +23,7 @@ instance Automaton DFA where
             where cond = (state, char)
                   rules `ruleFor` cond = head . filter (`appliesTo` cond) $ rules
 
-type DFARule = AutomatonRule DFACond
+type DFARule = AutomatonRule DFACond NextState
 dfaRule :: DFACond -> NextState -> DFARule
 dfaRule = AutomatonRule
 

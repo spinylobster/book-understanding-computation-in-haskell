@@ -13,16 +13,17 @@ module Chapter3.Automaton
 type State = Int
 type NextState = State
 type AcceptStates = [State]
-type Rulebook cond = [AutomatonRule cond]
+type Rulebook cond follow = [AutomatonRule cond follow]
 
-data AutomatonRule cond where
-  AutomatonRule :: Eq cond => cond -> NextState -> AutomatonRule cond
+data AutomatonRule cond follow where
+  AutomatonRule :: (Eq cond, Eq follow)
+    => cond -> follow -> AutomatonRule cond follow
 
-appliesTo :: AutomatonRule cond -> cond -> Bool
+appliesTo :: AutomatonRule cond follow -> cond -> Bool
 AutomatonRule cond _ `appliesTo` cond' = cond == cond'
 
-follow :: AutomatonRule cond -> NextState
-follow (AutomatonRule _ nextState) = nextState
+follow :: AutomatonRule cond follow -> follow
+follow (AutomatonRule _ follow) = follow
 
 class Automaton a where
   accepting :: a -> Bool
@@ -32,5 +33,5 @@ class Automaton a where
   accepts :: a -> String -> Bool
   a `accepts` str = accepting $ a `readString` str
 
-instance Eq (AutomatonRule cond) where
+instance Eq (AutomatonRule cond follow) where
   AutomatonRule cond ns == AutomatonRule cond' ns' = cond == cond' && ns == ns'
