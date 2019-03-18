@@ -1,0 +1,1 @@
+--command="stack ghci src/**/*.hs test/**/*.hs test/Spec.hs" --test="main"
